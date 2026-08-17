@@ -12,10 +12,10 @@ data = pd.read_csv(r"C:\Users\ypara\OneDrive\Desktop\OCR_proj\MNIST Digits.csv")
 d_tensor = np.array(data)
 
 d_tensor_T = d_tensor.T  # transposed tensor
+Input_Tensor_train = d_tensor_T[1:, :20000] / 255.0
 
-Input_Tensor_train = d_tensor_T[1:,1:20000]/255
+Result_Tensor_train = d_tensor_T[0, :20000]
 
-Result_Tensor_train = d_tensor_T[0,1:20000]
 
 Input_Tensor_dev = d_tensor_T[1:,20000:]/255
 
@@ -28,15 +28,16 @@ def Relu(x):
 
 
 def init_params(X):
-    W1 = np.random.rand(64 ,len(X)) - 0.5
-    b1 = np.zeros((64,1))
-    W2 = np.random.rand(10,64) - 0.5
-    b2 = np.zeros((10,1))
-    return W1, b1, W2, b2 
+    W1 = np.random.randn(128, len(X)) * np.sqrt(2. / len(X))  
+    b1 = np.zeros((128, 1))
+    W2 = np.random.randn(10, 128) * np.sqrt(2. / 128)       
+    b2 = np.zeros((10, 1))
+    return W1, b1, W2, b2
+
+
 
 
 def softmax(Z):
-    # Added axis=0 and keepdims=True to calculate probabilities per image column
     exp_Z = np.exp(Z - np.max(Z, axis=0, keepdims=True)) 
     return exp_Z / np.sum(exp_Z, axis=0, keepdims=True) 
 
@@ -80,24 +81,43 @@ def get_accuracy(predictions, Y):
     print(predictions, Y)
     return np.sum(predictions == Y)/Y.size 
 
-def gradient_descent(X,Y,iterations, alpha): 
+def power(alpha_0, iteration, s, p):  # s means step, p means power. 
+    alpha = alpha_0/(1 + iteration/s)^p
+    return alpha
+ 
+def exp(alpha_0, iteration, s):
+    alpha = alpha_0 * 0.93**(iteration/s)
+    return alpha
+
+def time_based(alpha_0,d, iteration):
+    alpha = alpha_0/(1 + d * iteration)
+    return alpha
+
+
+def gradient_descent(X,Y,iterations, alpha_0): 
     W1, b1, W2, b2 = init_params(X)
+    d = alpha_0/(iterations)
     for i in range(iterations):
         Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
         dW1, db1, dW2, db2 = back_prop(Z1,A1,A2,W2,X, Y)
+        alpha = time_based(alpha_0,d,i)
         W1, b1, W2, b2 = update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
         if (i % 10 == 0): 
             print("Iteration: ", i)
             print("Accuracy: ", get_accuracy(get_predictions(A2), Y))
 
-    return W1, b1, W2, b2 
+    return W1, b1, W2, b2, alpha 
 
 
-W1, b1, W2, b2 = gradient_descent(Input_Tensor_train, Result_Tensor_train,1000, 0.1)
+
+
+W1, b1, W2, b2,alpha = gradient_descent(Input_Tensor_train, Result_Tensor_train,1000, 0.5)
+print(alpha)
 
 _, _, _, A2_dev = forward_prop(W1, b1, W2, b2, Input_Tensor_dev)
 
-# Get predictions and calculate accuracy
+ #Get predictions and calculate accuracy
+ 
 dev_predictions = get_predictions(A2_dev)
 dev_accuracy = get_accuracy(dev_predictions, Result_Tensor_dev)
 
