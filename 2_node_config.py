@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # From what I know, first i need to set up the input. 
 
-data = pd.read_csv(r"C:\Users\ypara\OneDrive\Desktop\OCR_proj\MNIST Digits.csv")
+data = pd.read_csv(r"C:\Users\ypara\OneDrive\Desktop\Documents\GitHub\ocr-for-personal-use\MNIST Digits.csv")
 
 # The first column is the label, then column pixel 0, pixel 1, etc. We need to turn the columns into rows for matrix multiplication. 
 
@@ -151,7 +151,6 @@ for num in learning_rates:
 
     print(f"Alpha: {num} | Dev Accuracy: {accuracy_percent:.2f}%")
 
-    # Redraw graph
     ax.clear()
 
     ax.plot(
