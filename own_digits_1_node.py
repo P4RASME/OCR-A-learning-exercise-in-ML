@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
 
-p = Path(r"C:\Users\ypara\Onedrive\Desktop\OCR_proj\digits")
+p = Path(r"C:\Users\ypara\OneDrive\Desktop\Documents\GitHub\ocr-for-personal-use\digits")
 
 n_length = 28
 dev_tensor_own = []
@@ -47,7 +47,7 @@ result_Tensor_own = np.array(result_tensor_own)
 
 # From what I know, first i need to set up the input. 
 
-data = pd.read_csv(r"C:\Users\ypara\OneDrive\Desktop\OCR_proj\MNIST Digits.csv")
+data = pd.read_csv(r"C:\Users\ypara\OneDrive\Desktop\Documents\GitHub\ocr-for-personal-use\MNIST Digits.csv")
 
 # The first column is the label, then column pixel 0, pixel 1, etc. We need to turn the columns into rows for matrix multiplication. 
 
