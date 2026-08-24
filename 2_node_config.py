@@ -26,12 +26,12 @@ Result_Tensor_dev = d_tensor_T[0,20000:]
 
 def Relu(x):
     return np.maximum(0, x)
-
+# This function is flat to start with then 
 
 def init_params(X):
     W1 = np.random.randn(128, len(X)) * np.sqrt(2. / len(X))  
     b1 = np.zeros((128, 1))
-    W2 = np.random.rand(128,128) * np.sqrt(2./128) 
+    W2 = np.random.randn(128,128) * np.sqrt(2./128) 
     b2 = np.zeros((128,1))
     W3 = np.random.randn(10, 128) * np.sqrt(2. / 128)       
     b3 = np.zeros((10, 1))
@@ -113,22 +113,26 @@ def gradient_descent(X,Y,iterations, alpha_0):
 
 
 learning_rates = [
-    0.0001,
-    0.0003,
-    0.001,
-    0.003,
-    0.01,
-    0.03,
-    0.1,
-    0.3
+    0.70,
+    0.71,
+    0.72,
+    0.73,
+    0.74,
+    0.75,
+    0.76,
+    0.77,    
+    0.78,
+    0.79,
+    0.8
 ]
+
 
 accuracies = []
 
-plt.ion()  # Interactive mode
+plt.ion()  # Interactive mode- could use this in labs 
 
 fig, ax = plt.subplots()
-
+results = []
 for num in learning_rates:
 
     W1, b1, W2, b2, W3, b3, alpha = gradient_descent(
@@ -167,6 +171,12 @@ for num in learning_rates:
             xytext=(5, 8),
             textcoords="offset points"
         )
+    results.append({
+                "learning_rate": num,
+                "dev_accuracy": accuracy_percent,
+            })
+
+
 
     ax.set_xscale("log")
     ax.set_xlabel("Learning Rate (α)")
@@ -179,3 +189,8 @@ for num in learning_rates:
 
 plt.ioff()
 plt.show()
+output_dir = r"C:\Users\ypara\OneDrive\Desktop\Documents\GitHub\ocr-for-personal-use"
+
+results_df = pd.DataFrame(results)
+
+results_df.to_csv(fr"{output_dir}\training_results_more_refined.csv", index=False)
