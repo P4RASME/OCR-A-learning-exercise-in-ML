@@ -36,9 +36,25 @@ The poor accuracy on my handwriting led me to believe that the main problem was 
 ### Setup Details 
 - Two 128 neuron hidden layers
 - power based, time based, exponential and constant learning rates were used
-- The results are given in [training_results.csv](training_results.csv).
+- The results are given [here](training_results.csv).
 
 ### Results
 
-The results are visualised [here](Experiment_1_results.png).  As shown, the time based regime has the best accuracy overall, which is further validated by it having the highest average accuracy. TBC
+The results are visualised [here](Experiment_1_results.png).  As shown, the time based regime has the best accuracy overall, which is further validated by it having the highest average accuracy.  It was also observed that the dev accuracy decreases substantially for dev values greater than 0.3 for all learning regimes, suggesting that the system likely diverged as the learning rate was too high to get to reach a minimum loss.  This experiment motivated further tests with the time based regime in order to find the optimal initial learning rate.  One issue that arose here was that when I did the test multiple times, my dev accuracies would be different.  This is because the weight tensors are initialised with random values, meaning that the experiment is not deterministic.  To fix this, all future scripts will have a set seed so that results are reproducible. 
+
+
+## Time_based_testing.py
+
+Inspired by the results of Experiment 1, this script compares a variety of initial starting learning rates between 0.3 - 1 (as the boundary values here produced the best results in Experiment 1).
+
+### Setup Details
+- Script initialised with np.random.seed(42)
+- Two 128 neuron hidden layers
+- time based regime only, with variable initial learning rate
+- The results are given [here](training_results_refined.csv)
+
+### Results 
+
+The results were not promising.  Across the entire range of values, there was miniscule variation in the dev accuracy, averaging at 96.5%.  This end accuracy is also comparable to the accuracies achieved at the constant and time based regimes in Experiment 1, suggesting that there is a limiting factor that has not yet been addressed.  After further scrutinisation, I noticed that the training accuracies for the best results would exceed 99%, but the dev accuracy would then fall off to ~96%.  This suggests that there is overfitting to the data, meaning that the model is memorising the training data rather than generalising to numbers as a whole.  The cause of this is probably the complexity of the neural network, which allows it to form enough connections to memorise the training data set of 20,000 entirely.  This should be fixed by lowering the complexity, either by reducing the number of neurons or going back to one hidden layer. 
+
 
