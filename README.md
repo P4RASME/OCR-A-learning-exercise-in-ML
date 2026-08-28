@@ -30,3 +30,10 @@ Once I have accounted for this overfitting, I will re-do the experiments with th
 
 The ideal alpha_0 lies between 0.7-0.8 for the time_based tests. 
 
+
+### An attempt to reduce overfitting
+
+- Reducing the number of neurons in each layer only reduced the accuracy further, as seen in Complexity_optimisation_results_neurons.csv
+- The next step will be implementing data augmentation, which essentially involves shuffling the dataset at each iteration to make it seem 'new
+
+
