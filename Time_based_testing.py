@@ -9,18 +9,18 @@ data = pd.read_csv(r"C:\Users\ypara\OneDrive\Desktop\Documents\GitHub\ocr-for-pe
 # The first column is the label, then column pixel 0, pixel 1, etc. We need to turn the columns into rows for matrix multiplication. 
 
 # first, we convert the file into an array.
-
+np.random.seed(42)
 d_tensor = np.array(data)
 
 d_tensor_T = d_tensor.T  # transposed tensor
-Input_Tensor_train = d_tensor_T[1:, :20000] / 255.0
+Input_Tensor_train = d_tensor_T[1:, :30000] / 255.0
 
-Result_Tensor_train = d_tensor_T[0, :20000]
+Result_Tensor_train = d_tensor_T[0, :30000]
 
 
-Input_Tensor_dev = d_tensor_T[1:,20000:]/255
+Input_Tensor_dev = d_tensor_T[1:,30000:]/255
 
-Result_Tensor_dev = d_tensor_T[0,20000:]
+Result_Tensor_dev = d_tensor_T[0,30000:]
 
 # These are the results against which we check our answers. 
 
@@ -96,18 +96,25 @@ def time_based(alpha_0,d, iteration):
     alpha = alpha_0/(1 + d * iteration)
     return alpha
 
-
 def gradient_descent(X,Y,iterations, alpha_0): 
     W1, b1, W2, b2, W3, b3 = init_params(X)
     d = alpha_0/(iterations)
+    n_samples = X.shape[1]
     for i in range(iterations):
-        Z1, A1, Z2, A2, Z3, A3 = forward_prop(W1, b1, W2, b2, W3, b3, X)
-        dW1, db1, dW2, db2, dW3, db3 = back_prop(Z1, A1, Z2, A2, A3, W2, W3, X, Y)
+        indices = np.arange(n_samples)
+        np.random.shuffle(indices)
+
+        X_shuffled = X[:, indices]
+        Y_shuffled = Y[indices]
+
+        np.array_equal(X_shuffled[:, 0], X[:, indices[0]])
+        Z1, A1, Z2, A2, Z3, A3 = forward_prop(W1, b1, W2, b2, W3, b3, X_shuffled)
+        dW1, db1, dW2, db2, dW3, db3 = back_prop(Z1, A1, Z2, A2, A3, W2, W3, X_shuffled, Y_shuffled)
         alpha = time_based(alpha_0,d,i)
         W1, b1, W2, b2, W3, b3 = update_params(W1, b1, W2, b2, W3, b3,dW1, db1, dW2, db2, dW3, db3,alpha)
         if (i % 10 == 0): 
             print("Iteration: ", i)
-            print("Accuracy: ", get_accuracy(get_predictions(A3), Y))
+            print("Accuracy: ", get_accuracy(get_predictions(A3), Y_shuffled))
 
     return W1, b1, W2, b2,W3,b3, alpha 
 
@@ -193,4 +200,4 @@ output_dir = r"C:\Users\ypara\OneDrive\Desktop\Documents\GitHub\ocr-for-personal
 
 results_df = pd.DataFrame(results)
 
-results_df.to_csv(fr"{output_dir}\training_results_more_refined.csv", index=False)
+results_df.to_csv(fr"{output_dir}\time_based_shuffled.csv", index=False)
