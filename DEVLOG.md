@@ -51,10 +51,20 @@ Inspired by the results of Experiment 1, this script compares a variety of initi
 - Script initialised with np.random.seed(42)
 - Two 128 neuron hidden layers
 - time based regime only, with variable initial learning rate
-- The results are given [here](training_results_refined.csv)
+
 
 ### Results 
+The results are given [here](training_results_refined.csv).  The results were not promising.  Across the entire range of values, there was miniscule variation in the dev accuracy, averaging at 96.5%.  This end accuracy is also comparable to the accuracies achieved at the constant and time based regimes in Experiment 1, suggesting that there is a limiting factor that has not yet been addressed.  After further scrutinisation, I noticed that the training accuracies for the best results would exceed 99%, but the dev accuracy would then fall off to ~96%.  This suggests that there is overfitting to the data, meaning that the model is memorising the training data rather than generalising to numbers as a whole.  The cause of this is probably the complexity of the neural network, which allows it to form enough connections to memorise the training data set of 20,000 entirely.  This should be fixed by lowering the complexity, either by reducing the number of neurons or going back to one hidden layer. 
 
-The results were not promising.  Across the entire range of values, there was miniscule variation in the dev accuracy, averaging at 96.5%.  This end accuracy is also comparable to the accuracies achieved at the constant and time based regimes in Experiment 1, suggesting that there is a limiting factor that has not yet been addressed.  After further scrutinisation, I noticed that the training accuracies for the best results would exceed 99%, but the dev accuracy would then fall off to ~96%.  This suggests that there is overfitting to the data, meaning that the model is memorising the training data rather than generalising to numbers as a whole.  The cause of this is probably the complexity of the neural network, which allows it to form enough connections to memorise the training data set of 20,000 entirely.  This should be fixed by lowering the complexity, either by reducing the number of neurons or going back to one hidden layer. 
+## Complexity_optimisation.py 
 
+In an attempt to improve dev accuracy, this script tests the accuracy of the model at different neuron numbers, from 128 down to 16.  Moreover, shuffling was implemented as a data augmentation technique to also improve accuracy. 
 
+### Setup details 
+- 30,000 training data
+- Tested complexities (neuron numbers): 128, 64, 32, 16
+- Only used the time based regime, with alpha = 0.7
+- Two tests were done, one without shuffling and one with shuffling.
+
+### Results
+ Non shuffling results are [here](Complexity_optmisation_results_neurons.csv) and the shuffling ones are [here](Complexity_optimisation_results_shuffling.csv).

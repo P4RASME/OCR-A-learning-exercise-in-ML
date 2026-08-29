@@ -15,7 +15,7 @@ After this more 'exploratory' phase, I feel that I should design a methodology a
 - Added a second hidden layer so that the model can capture more complex patterns.
 - Inspired by LeCun et. al's image formatting process for the MNIST database, set up an image processing script for my own handwritten numbers that seamlessly converts handwritten digits into compatible arrays.
 
-## Basic logs/notes 
+## Rough notes 
 
 ### Optimising for accuracy 
 
