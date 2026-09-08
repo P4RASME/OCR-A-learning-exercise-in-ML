@@ -1,20 +1,30 @@
+
+
+
 # set params
 n_samples = 30000 
 l_rate = 0.001
 iterations = 500
-b_size = 32
+
+
+
+
+
+
+
 
 import numpy as np 
 from scipy import signal
 import pandas as pd
 import time
+from pathlib import Path
 np.random.seed(24)
 
 start_time = time.time()
 
 # initial data stuff: 
 
-data = pd.read_csv(r"C:\Users\ypara\OneDrive\Desktop\Documents\GitHub\ocr-for-personal-use\MNIST Digits.csv")
+data = pd.read_csv(Path(__file__).with_name("MNIST Digits.csv"))
 
 # The first column is the label, then column pixel 0, pixel 1, etc. We need to turn the columns into rows for matrix multiplication. 
 
@@ -41,12 +51,8 @@ class Layer:
         # TODO: return output
         pass
 
-    def backward(self, output_gradient, learning_rate=None):
+    def backward(self, output_gradient, learning_rate):
         # TODO: update parameters and return input gradient
-        pass
-    
-    def update_parameters(self, learning_rate, batch_size):
-        # Default implementation for layers without parameters (Activation, Reshape, etc.)
         pass
 # Before starting, we define a new datatype, layer, so that we can perform the entire process by simply running through a python loop. 
 # The layer contains a forward pass function, backward pass function and variables to store the input and output. 
@@ -62,11 +68,6 @@ class Convolutional(Layer):
         self.kernels_shape = (depth, input_depth,kernel_size, kernel_size)
         self.kernels = np.random.randn(*self.kernels_shape)
         self.biases = np.random.randn(*self.output_shape) # do not have to compute the biases as the biases have the same shape as the output, as in normal neural networks.
-        
-        # Mini-batch gradient accumulators
-        self.kernels_gradient_acc = np.zeros(self.kernels_shape)
-        self.biases_gradient_acc = np.zeros(self.output_shape)
-        
     def forward(self,input):
         self.input = input 
         self.output = np.copy(self.biases)
@@ -74,8 +75,7 @@ class Convolutional(Layer):
             for j in range(self.input_depth):
                 self.output[i] += signal.correlate2d(self.input[j],self.kernels[i,j],"valid")
         return self.output
-    
-    def backward(self, output_gradient, learning_rate=None):
+    def backward(self, output_gradient, learning_rate):
         kernels_gradient = np.zeros(self.kernels_shape) # initialises kernel gradients, with all zeroes of course
         input_gradient = np.zeros(self.input_shape) #initialises the input gradient
 
@@ -83,21 +83,9 @@ class Convolutional(Layer):
             for j in range(self.input_depth):
                 kernels_gradient[i,j] = signal.correlate2d(self.input[j],output_gradient[i],"valid")
                 input_gradient[j] += signal.convolve2d(output_gradient[i], self.kernels[i,j], "full") # specifying a full convolution here!
-        
-        # Accumulate gradients instead of updating immediately
-        self.kernels_gradient_acc += kernels_gradient
-        self.biases_gradient_acc += output_gradient
-        
-        return input_gradient
-    
-    def update_parameters(self, learning_rate, batch_size):
-        # Update parameters using the average gradient of the batch
-        self.kernels -= learning_rate * (self.kernels_gradient_acc / batch_size)
-        self.biases -= learning_rate * (self.biases_gradient_acc / batch_size)
-        
-        # Reset accumulators for the next batch
-        self.kernels_gradient_acc.fill(0.0)
-        self.biases_gradient_acc.fill(0.0)
+        self.kernels -= learning_rate * kernels_gradient
+        self.biases -= learning_rate * output_gradient 
+        return input_gradient 
 
 class Reshape(Layer):
     def __init__(self, input_shape, output_shape):
@@ -106,7 +94,7 @@ class Reshape(Layer):
     def forward(self,input): 
         return np.reshape(input,self.output_shape) # gives the input the output shape 
     
-    def backward(self,output_gradient, learning_rate=None):
+    def backward(self,output_gradient,learning_rate):
         return np.reshape(output_gradient,self.input_shape) # gives the output gradient the input shape, allowiing for backprop
 
 
@@ -127,7 +115,7 @@ class Activation(Layer):
         self.input = input
         return self.activation(self.input)
 
-    def backward(self, output_gradient, learning_rate=None):
+    def backward(self, output_gradient, learning_rate):
         return np.multiply(output_gradient, self.activation_prime(self.input))
 
 class Softmax(Layer):
@@ -137,7 +125,7 @@ class Softmax(Layer):
         self.output = exp_values / np.sum(exp_values)
         return self.output
     
-    def backward(self, output_gradient, learning_rate=None):
+    def backward(self, output_gradient, learning_rate):
         # when combined with categorical cross-entropy, the gradient simplifies to just passing through
         return output_gradient
 
@@ -146,30 +134,19 @@ class Dense(Layer):
     def __init__(self, input_size, output_size):
         self.weights = np.random.randn(output_size, input_size)
         self.biases = np.random.randn(output_size, 1)
-        
-        # Mini-batch gradient accumulators
-        self.weights_gradient_acc = np.zeros((output_size, input_size))
-        self.biases_gradient_acc = np.zeros((output_size, 1))
     
     def forward(self, input):
         self.input = input
         return np.dot(self.weights, self.input) + self.biases
     
-    def backward(self, output_gradient, learning_rate=None):
-        self.weights_gradient_acc += np.dot(output_gradient, self.input.T)
-        self.biases_gradient_acc += output_gradient
-        
+    def backward(self, output_gradient, learning_rate):
+        weights_gradient = np.dot(output_gradient, self.input.T)
         input_gradient = np.dot(self.weights.T, output_gradient) 
+        
+        self.weights -= learning_rate * weights_gradient
+        self.biases -= learning_rate * output_gradient
+        
         return input_gradient
-        
-    def update_parameters(self, learning_rate, batch_size):
-        # Update weights using the average gradient of the batch
-        self.weights -= learning_rate * (self.weights_gradient_acc / batch_size)
-        self.biases -= learning_rate * (self.biases_gradient_acc / batch_size)
-        
-        # Reset accumulators for the next batch
-        self.weights_gradient_acc.fill(0.0)
-        self.biases_gradient_acc.fill(0.0)
     # defining a dense layer removes the need for having to make separate weights and copy paste individual calculations, as it allows us to just add a layer whenever we please
 
 class Tanh(Activation):
@@ -194,44 +171,28 @@ def get_predictions(output):
 def get_accuracy(predictions, Y):
     return np.sum(predictions == Y) / Y.size # calculating the portion of results that were correct.
 
-def train(network, loss, loss_prime, x_train, y_train, epochs, learning_rate, batch_size): 
-    num_samples = len(x_train)
-    
+def train(network, loss, loss_prime, x_train, y_train, epochs, learning_rate): 
     for epoch in range(epochs): 
         error = 0 
         correct = 0
-        
-        # Shuffle data at the beginning of every epoch for optimal mini-batching
-        indices = np.arange(num_samples)
-        np.random.shuffle(indices)
-        
-        # Loop through data in steps of batch_size
-        for b in range(0, num_samples, batch_size):
-            batch_indices = indices[b:b + batch_size]
-            current_batch_size = len(batch_indices) # Accounts for the final smaller batch
+        for i in range(len(x_train)):
+            output = x_train[i]
+            for layer in network: 
+                output = layer.forward(output)
+
+            error += loss(y_train[i], output)
             
-            # Step 1: Accumulate gradients over the mini-batch
-            for idx in batch_indices:
-                output = x_train[idx]
-                for layer in network: 
-                    output = layer.forward(output)
+            # calculate accuracy
+            prediction = get_predictions(output)
+            if prediction == np.argmax(y_train[i]):
+                correct += 1
 
-                error += loss(y_train[idx], output)
-                
-                prediction = get_predictions(output)
-                if prediction == np.argmax(y_train[idx]):
-                    correct += 1
+            grad = loss_prime(y_train[i], output)
+            for layer in reversed(network):
+                grad = layer.backward(grad,learning_rate)
 
-                grad = loss_prime(y_train[idx], output)
-                for layer in reversed(network):
-                    grad = layer.backward(grad)
-            
-            # Step 2: Trigger parameter updates at the end of the batch
-            for layer in network:
-                layer.update_parameters(learning_rate, current_batch_size)
-
-        error /= num_samples  
-        accuracy = (correct / num_samples) * 100  
+        error /= len(x_train)  # divides the error by the number of inputs 
+        accuracy = (correct / len(x_train)) * 100  # calculate percentage accuracy
 
         print(f"Epoch {epoch + 1}/{epochs}, Loss: {error:.4f}, Accuracy: {accuracy:.2f}%")
     
@@ -270,14 +231,14 @@ def prepare_data(input_tensor, result_tensor, num_samples):
     return X, Y # preparing data so that it is in a 2d shape rather than a list, and one hot encoding as softmax demands it. 
 
 # prepare training samples 
-X_train, Y_train = prepare_data(Input_Tensor_train, Result_Tensor_train, n_samples)
+X_train, Y_train = prepare_data(Input_Tensor_train, Result_Tensor_train,n_samples  )
 
 # prepare dev set
 X_dev, Y_dev = prepare_data(Input_Tensor_dev, Result_Tensor_dev, len(Result_Tensor_dev))
 
 # train the network
 network = train(network, categorical_cross_entropy, categorical_cross_entropy_prime, 
-      X_train, Y_train, iterations, l_rate, b_size)
+      X_train, Y_train, iterations, l_rate)
 
 # evaluate on dev set
 dev_accuracy = evaluate_dev(network, X_dev, Y_dev)
