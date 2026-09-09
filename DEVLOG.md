@@ -67,4 +67,15 @@ In an attempt to improve dev accuracy, this script tests the accuracy of the mod
 - Two tests were done, one without shuffling and one with shuffling.
 
 ### Results
- Non shuffling results are [here](Complexity_optmisation_results_neurons.csv) and the shuffling ones are [here](Complexity_optimisation_results_shuffling.csv).
+ Non shuffling results are [here](Complexity_optmisation_results_neurons.csv) and the shuffling ones are [here](Complexity_optimisation_results_shuffling.csv).  The shuffling did increase accuracy slightly overall, although the difference was marginal. 
+
+ ## Culmination of simple/feedforward neural network tests
+
+ Combining shuffling, as well as the optimal learning rate scheduler with the best starting value, the model achieved an accuracy of 97.28% on the MNIST.  At this point, it seemed that no further optimisations could be done, leading me to look into convolutional neural networks.
+
+## Convolutional Neural Network (CNN.py) 
+
+Built a CNN from scratch using the approach described in [This video](https://youtu.be/Lakz2MoHy6o?si=iIttN9mm21UCFsN-s).  I changed the cross entropy loss and activation functions to generalise to all digits rather than just two, added xavier initialisation for tanh activation and added a time based scheduler.  Ran a handful of tests to compare the accuracies for the older model and the newer model, and the CNN outperformed the simple network in all tests.  However, as the runtime is very high (upwards of 3 hours) for the CNN, the tests take a very long time.  In an attempt to reduce runtime, I found that the primary way to speed up computation without importing any AI libraries would be a GPU accelerator.  Unfortunately, I currently lack the hardware/compute to use one, but I endeavour to return to the project to have more clear results once I do. 
+ 
+
+ 
