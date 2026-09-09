@@ -14,6 +14,8 @@ After this more 'exploratory' phase, I feel that I should design a methodology a
 - Explored various simple learning rate schedulers (exponential, time based, and power scheduling) and tested their relative effectiveness.
 - Added a second hidden layer so that the model can capture more complex patterns.
 - Inspired by LeCun et. al's image formatting process for the MNIST database, set up an image processing script for my own handwritten numbers that seamlessly converts handwritten digits into compatible arrays.
+- Optmised the time based scheduling method, alongside shuffling batches to achieve 97.28% accuracy on the MNIST.
+- Created a Convolutional Neural Network from scratch with stochastic gradient descent, outperforming the previous model on all tests done so far.  
 
 ## Rough notes 
 
@@ -38,4 +40,32 @@ The ideal alpha_0 lies between 0.7-0.8 for the time_based tests.
 - Shuffling the dataset had marginal impact, in fact reducing average accuracy by 1%
 - We may have reached a limit for this model
 
+## CNN Implementation 
+Filters are grids that matrix multiply across the entire image- they are basically the analog for weights.  The reason its called 'convolutional' is that these filters act as filter functions, as seen in convolutions from the fourier course, they take the 28x28 pixel image and reduce it in size.  The number of filters you have correspond to the number of images your produce- ie. 
+
+1 image + 2 filters = 2 filtered images
+
+The key forward propagation process is: 
+
+input layer --> filtering + activation function ---> max pooling ---> filtering  + activation function---> max pooling ---> output. 
+
+We are doing a very similar matrix multiplication, just with more dimensions. 
+
+filter has associated bias, exact same thing as before.  The key step is still Z = activation_function(XW + B)
+
+what are your questions: 
+
+- What makes this better than a normal neural network? 
+uses fewer paramters as the same, small filter is just slid across the whole image. less parameters ---> overfitting which was a problem earlier. 
+Identifies FEATURES, not precise mathematical positions, so is not vulnerable to rotations and such. 
+less parameters also means less memory and faster. 
+
+- Why do they make images blurrier? 
+To identify general features rather than hone in on fine details, less overfitting and more general use case.  The max pooling takes an 'average' of a given space, only letting the model see the broad strokes.
+
+- Kernels are like weights, but they don’t do the same job.  Kernels in the convolutional layer are changed and refined to create the best filters for the actual weights and biases, that are found in the DENSE or ‘fully connected’ layers. 
+
+- These layers do the actual learning, the convolutional layers, as reported earlier, just exploit the 2d structure to help pick out the best features for the dense layers to be the most accurate. 
+
+So, the script I am making is a 3 layer structure, but only two layers are doing ‘actual’ learning, the third is just picking out features by optimising filter parameters. 
 
