@@ -15,7 +15,7 @@ After this more 'exploratory' phase, I feel that I should design a methodology a
 - Added a second hidden layer so that the model can capture more complex patterns.
 - Inspired by LeCun et. al's image formatting process for the MNIST database, set up an image processing script for my own handwritten numbers that seamlessly converts handwritten digits into compatible arrays.
 - Optmised the time based scheduling method, alongside shuffling batches to achieve 97.28% accuracy on the MNIST.
-- Created a Convolutional Neural Network from scratch with stochastic gradient descent, outperforming the previous model on all tests done so far.  
+- Created a Convolutional Neural Network from scratch with stochastic gradient descent, outperforming the previous model on all accuracy tests.
 
 ## Rough notes 
 
