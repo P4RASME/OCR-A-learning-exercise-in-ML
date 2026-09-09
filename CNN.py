@@ -1,14 +1,7 @@
-
-
-
 # set params
-n_samples = 30000 
-l_rate = 0.001
-iterations = 500
-
-
-
-
+n_samples = 1000 
+l_rate = 0.003 # learning rate increased 
+iterations = 200
 
 
 
@@ -33,14 +26,14 @@ data = pd.read_csv(Path(__file__).with_name("MNIST Digits.csv"))
 d_tensor = np.array(data)
 
 d_tensor_T = d_tensor.T  # transposed tensor
-Input_Tensor_train = d_tensor_T[1:, :30000] / 255.0
+Input_Tensor_train = d_tensor_T[1:, :n_samples] / 255.0
 
-Result_Tensor_train = d_tensor_T[0, :30000]
+Result_Tensor_train = d_tensor_T[0, :n_samples]
 
 
-Input_Tensor_dev = d_tensor_T[1:,30000:]/255
+Input_Tensor_dev = d_tensor_T[1:,n_samples:]/255
 
-Result_Tensor_dev = d_tensor_T[0,30000:]
+Result_Tensor_dev = d_tensor_T[0,n_samples:]
 
 class Layer:
     def __init__(self):
@@ -132,8 +125,9 @@ class Softmax(Layer):
 
 class Dense(Layer):
     def __init__(self, input_size, output_size):
-        self.weights = np.random.randn(output_size, input_size)
-        self.biases = np.random.randn(output_size, 1)
+        std_dev = np.sqrt(2.0 / (input_size + output_size))
+        self.weights = np.random.randn(output_size, input_size) * std_dev
+        self.biases = np.zeros((output_size, 1))
     
     def forward(self, input):
         self.input = input
@@ -171,10 +165,17 @@ def get_predictions(output):
 def get_accuracy(predictions, Y):
     return np.sum(predictions == Y) / Y.size # calculating the portion of results that were correct.
 
+def time_based(alpha_0, d, iteration):
+    alpha = alpha_0 / (1 + d * iteration)
+    return alpha
+# same decay function as the other script - alpha_0 is the starting rate, d controls how fast it decays, iteration is how far into training we are
+
 def train(network, loss, loss_prime, x_train, y_train, epochs, learning_rate): 
+    d = learning_rate / epochs  # decay constant
     for epoch in range(epochs): 
         error = 0 
         correct = 0
+        current_lr = time_based(learning_rate, d, epoch)  # decay the rate once per epoch, same granularity as "per iteration" before
         for i in range(len(x_train)):
             output = x_train[i]
             for layer in network: 
@@ -189,12 +190,12 @@ def train(network, loss, loss_prime, x_train, y_train, epochs, learning_rate):
 
             grad = loss_prime(y_train[i], output)
             for layer in reversed(network):
-                grad = layer.backward(grad,learning_rate)
+                grad = layer.backward(grad,current_lr)
 
         error /= len(x_train)  # divides the error by the number of inputs 
         accuracy = (correct / len(x_train)) * 100  # calculate percentage accuracy
 
-        print(f"Epoch {epoch + 1}/{epochs}, Loss: {error:.4f}, Accuracy: {accuracy:.2f}%")
+        print(f"Epoch {epoch + 1}/{epochs}, Loss: {error:.4f}, Accuracy: {accuracy:.2f}%, LR: {current_lr:.6f}")
     
     return network
 

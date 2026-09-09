@@ -13,14 +13,14 @@ np.random.seed(42)
 d_tensor = np.array(data)
 
 d_tensor_T = d_tensor.T  # transposed tensor
-Input_Tensor_train = d_tensor_T[1:, :30000] / 255.0
+Input_Tensor_train = d_tensor_T[1:, :10000] / 255.0
 
-Result_Tensor_train = d_tensor_T[0, :30000]
+Result_Tensor_train = d_tensor_T[0, :10000]
 
 
-Input_Tensor_dev = d_tensor_T[1:,30000:]/255
+Input_Tensor_dev = d_tensor_T[1:,10000:]/255
 
-Result_Tensor_dev = d_tensor_T[0,30000:]
+Result_Tensor_dev = d_tensor_T[0,10000:]
 
 # These are the results against which we check our answers. 
 
@@ -120,17 +120,17 @@ def gradient_descent(X,Y,iterations, alpha_0):
 
 
 learning_rates = [
-    0.70,
-    0.71,
-    0.72,
-    0.73,
-    0.74,
-    0.75,
-    0.76,
-    0.77,    
-    0.78,
-    0.79,
-    0.8
+    #0.70,
+    #0.71,
+   # 0.72,
+    #0.73,
+    #0.74,
+    #0.75,
+    #0.76,
+    0.77    
+    #0.78,
+    #0.79,
+    #0.8
 ]
 
 
@@ -145,7 +145,7 @@ for num in learning_rates:
     W1, b1, W2, b2, W3, b3, alpha = gradient_descent(
         Input_Tensor_train,
         Result_Tensor_train,
-        1000,
+        200,
         num
     )
 
